@@ -1,0 +1,74 @@
+
+import psycopg2
+import pandas as pd
+import numpy as np
+
+
+def print_hi(name):
+    print(f'Hi, {name}')
+
+if __name__ == '__main__':
+    print_hi('PyCharm')
+    print(f'Ca fait du bien de te revoir Guillaume')
+try:
+    conn = psycopg2.connect(
+        user="",
+        password="",
+        host="",
+        port="",
+        database=""
+       
+    )
+    cur = conn.cursor()
+
+    # Afficher la version de PostgreSQL
+    cur.execute("SELECT version();")
+    version = cur.fetchone()
+    print("Version : ", version, "\n")
+
+    sql = "SELECT presencebati,nature,codeoccuprelief,codetaxationrelief,logement,categorie,idadresse FROM schema_2019_b.locaux "
+    id = 1
+    cur.execute(sql)
+    res = cur.fetchall()
+    # df = pd.DataFrame(res)
+
+    df = pd.read_sql(sql, conn)
+
+    # print(df)
+
+    # for row in res:
+    #     print("presencebati = ", row[0] )
+    #     print("nature = ", row[1])
+    #     print("codeoccuprelief = ", row[2])
+    #     print("codetaxationrelief = ", row[3])
+    #     print("logement = ", row[4])
+    #     print("categorie = ", row[5])
+    #     print("idadresse  = ", row[6], "\n")
+
+    nombrelignes = len(df)
+    print("Nombre total de locaux : ",nombrelignes,"\n")
+
+    # res_logement = [sub_list[0] for sub_list in res]
+    # for row in logement:
+    #     print("logement ou pas = ", row[0])
+    # nombrelignes = len(res_logement)
+    # print("nombre de lignes : ", nombrelignes)
+
+    print("Voici le nombre de logements par value_counts : ")
+    test = df['logement'].value_counts()
+    print(test,"\n")
+    # print("Voici le nombre de logements par describe : ")
+    # test = df['logement'].describe()
+    # print(test)
+    print("Voici le nombre de residences principales : ")
+    test = df[(df['logement']=='O') & (df['categorie']=='P')]
+    test2 = len(test)
+    print(test2,"\n")
+
+    # fermeture de la connexion à la base de données
+    cur.close()
+    conn.close()
+    print("La connexion PostgreSQL est fermée")
+
+except (Exception, psycopg2.Error) as error:
+    print("Erreur lors de la connexion à PostgreSQL", error)
